@@ -2,7 +2,6 @@ package main
 
 import (
 	"go-onion-arch-sample/application/service"
-	"go-onion-arch-sample/domain/model"
 	"go-onion-arch-sample/infrastructure/database"
 	"go-onion-arch-sample/infrastructure/repository"
 	"go-onion-arch-sample/userinterface/handler"
@@ -17,7 +16,7 @@ func main() {
 		panic(err)
 	}
 
-	db.Client.AutoMigrate(&model.Task{})
+	// db.Client.AutoMigrate(&model.Task{})
 
 	taskRepo := repository.NewTaskRepository(db)
 

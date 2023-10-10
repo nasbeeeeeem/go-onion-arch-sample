@@ -2,8 +2,9 @@ package handler
 
 import (
 	"go-onion-arch-sample/application/service"
-	"go-onion-arch-sample/domain/model"
+	"go-onion-arch-sample/ent"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,8 +22,8 @@ func NewTaskHandler(taskService service.TaskService) *TaskHandler {
 
 // タスクの登録
 func (h *TaskHandler) CreateTask(c echo.Context) error {
-	task := new(model.Task)
-	if err := c.Bind(task); err != nil {
+	task := &ent.Task{}
+	if err := c.Bind(&task); err != nil {
 		return err
 	}
 
@@ -37,8 +38,12 @@ func (h *TaskHandler) CreateTask(c echo.Context) error {
 // タスクの取得
 func (h *TaskHandler) GetTaskByID(c echo.Context) error {
 	id := c.Param("id")
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
 
-	task, err := h.TaskService.GetTaskById(id)
+	task, err := h.TaskService.GetTaskById(taskID)
 	if err != nil {
 		return err
 	}
@@ -48,7 +53,7 @@ func (h *TaskHandler) GetTaskByID(c echo.Context) error {
 
 // タスクの全件取得
 func (h *TaskHandler) GetTasks(c echo.Context) error {
-	tasks, err := h.TaskService.GetTasks()
+	tasks, err := h.TaskService.GetTasks(c)
 	if err != nil {
 		return err
 	}
@@ -58,13 +63,18 @@ func (h *TaskHandler) GetTasks(c echo.Context) error {
 
 // タスクの更新
 func (h *TaskHandler) UpdateTask(c echo.Context) error {
-	task := new(model.Task)
 	id := c.Param("id")
-	if err := c.Bind(task); err != nil {
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
 		return err
 	}
 
-	updateTask, err := h.TaskService.UpdateTask(task, id)
+	var task ent.Task
+	if err := c.Bind(&task); err != nil {
+		return err
+	}
+
+	updateTask, err := h.TaskService.UpdateTask(&task, taskID)
 	if err != nil {
 		return err
 	}
@@ -75,8 +85,12 @@ func (h *TaskHandler) UpdateTask(c echo.Context) error {
 // タスクの削除
 func (h *TaskHandler) DeleteTask(c echo.Context) error {
 	id := c.Param("id")
+	taskID, err := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
 
-	if err := h.TaskService.DeleteTask(id); err != nil {
+	if err := h.TaskService.DeleteTask(taskID); err != nil {
 		return err
 	}
 

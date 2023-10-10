@@ -2,16 +2,18 @@
 package service
 
 import (
-	"go-onion-arch-sample/domain/model"
 	"go-onion-arch-sample/domain/repository"
+	"go-onion-arch-sample/ent"
+
+	"github.com/labstack/echo/v4"
 )
 
 type TaskService interface {
-	CreateTask(task *model.Task) (*model.Task, error)
-	GetTaskById(id string) (*model.Task, error)
-	GetTasks() ([]model.Task, error)
-	UpdateTask(task *model.Task, id string) (*model.Task, error)
-	DeleteTask(id string) error
+	CreateTask(task *ent.Task) (*ent.Task, error)
+	GetTaskById(taskID int) (*ent.Task, error)
+	GetTasks(echo.Context) ([]*ent.Task, error)
+	UpdateTask(task *ent.Task, taskID int) (*ent.Task, error)
+	DeleteTask(taskID int) error
 }
 
 type taskService struct {
@@ -25,26 +27,26 @@ func NewTaskService(taskRepo repository.TaskRepository) TaskService {
 }
 
 // タスクの登録
-func (t *taskService) CreateTask(task *model.Task) (*model.Task, error) {
+func (t *taskService) CreateTask(task *ent.Task) (*ent.Task, error) {
 	return t.taskRepo.CreateTask(task)
 }
 
 // タスクの取得
-func (t *taskService) GetTaskById(id string) (*model.Task, error) {
-	return t.taskRepo.GetTaskById(id)
+func (t *taskService) GetTaskById(taskID int) (*ent.Task, error) {
+	return t.taskRepo.GetTaskById(taskID)
 }
 
-// タスクの一覧取得
-func (t *taskService) GetTasks() ([]model.Task, error) {
-	return t.taskRepo.GetTasks()
+// タスクの全件取得
+func (t *taskService) GetTasks(c echo.Context) ([]*ent.Task, error) {
+	return t.taskRepo.GetTasks(c)
 }
 
 // タスクの更新
-func (t *taskService) UpdateTask(task *model.Task, id string) (*model.Task, error) {
-	return t.taskRepo.UpdateTask(task, id)
+func (t *taskService) UpdateTask(task *ent.Task, taskID int) (*ent.Task, error) {
+	return t.taskRepo.UpdateTask(task, taskID)
 }
 
 // タスクの削除
-func (t *taskService) DeleteTask(id string) error {
-	return t.taskRepo.DeleteTask(id)
+func (t *taskService) DeleteTask(taskID int) error {
+	return t.taskRepo.DeleteTask(taskID)
 }
