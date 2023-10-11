@@ -16,8 +16,6 @@ func main() {
 		panic(err)
 	}
 
-	// db.Client.AutoMigrate(&model.Task{})
-
 	taskRepo := repository.NewTaskRepository(db)
 
 	taskService := service.NewTaskService(taskRepo)
