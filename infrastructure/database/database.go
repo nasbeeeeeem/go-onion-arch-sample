@@ -5,7 +5,7 @@ import (
 	"context"
 	"go-onion-arch-sample/ent"
 
-	_ "github.com/lib/pq" // This line is required to register the Postgres driver.
+	_ "github.com/lib/pq"
 
 	"entgo.io/ent/dialect"
 )

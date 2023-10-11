@@ -26,5 +26,5 @@ func main() {
 
 	router.NewRouter(e, taskHandler)
 
-	e.Start(":8080")
+	e.Start("localhost:8080")
 }

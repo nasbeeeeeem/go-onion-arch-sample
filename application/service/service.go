@@ -4,15 +4,13 @@ package service
 import (
 	"go-onion-arch-sample/domain/repository"
 	"go-onion-arch-sample/ent"
-
-	"github.com/labstack/echo/v4"
 )
 
 type TaskService interface {
-	CreateTask(task *ent.Task) (*ent.Task, error)
+	CreateTask(task ent.Task) (*ent.Task, error)
 	GetTaskById(taskID int) (*ent.Task, error)
-	GetTasks(echo.Context) ([]*ent.Task, error)
-	UpdateTask(task *ent.Task, taskID int) (*ent.Task, error)
+	GetTasks() ([]*ent.Task, error)
+	UpdateTask(task ent.Task, taskID int) (*ent.Task, error)
 	DeleteTask(taskID int) error
 }
 
@@ -27,7 +25,7 @@ func NewTaskService(taskRepo repository.TaskRepository) TaskService {
 }
 
 // タスクの登録
-func (t *taskService) CreateTask(task *ent.Task) (*ent.Task, error) {
+func (t *taskService) CreateTask(task ent.Task) (*ent.Task, error) {
 	return t.taskRepo.CreateTask(task)
 }
 
@@ -37,12 +35,12 @@ func (t *taskService) GetTaskById(taskID int) (*ent.Task, error) {
 }
 
 // タスクの全件取得
-func (t *taskService) GetTasks(c echo.Context) ([]*ent.Task, error) {
-	return t.taskRepo.GetTasks(c)
+func (t *taskService) GetTasks() ([]*ent.Task, error) {
+	return t.taskRepo.GetTasks()
 }
 
 // タスクの更新
-func (t *taskService) UpdateTask(task *ent.Task, taskID int) (*ent.Task, error) {
+func (t *taskService) UpdateTask(task ent.Task, taskID int) (*ent.Task, error) {
 	return t.taskRepo.UpdateTask(task, taskID)
 }
 

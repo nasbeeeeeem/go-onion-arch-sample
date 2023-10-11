@@ -22,7 +22,7 @@ func NewTaskHandler(taskService service.TaskService) *TaskHandler {
 
 // タスクの登録
 func (h *TaskHandler) CreateTask(c echo.Context) error {
-	task := &ent.Task{}
+	task := ent.Task{}
 	if err := c.Bind(&task); err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func (h *TaskHandler) GetTaskByID(c echo.Context) error {
 
 // タスクの全件取得
 func (h *TaskHandler) GetTasks(c echo.Context) error {
-	tasks, err := h.TaskService.GetTasks(c)
+	tasks, err := h.TaskService.GetTasks()
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (h *TaskHandler) UpdateTask(c echo.Context) error {
 		return err
 	}
 
-	updateTask, err := h.TaskService.UpdateTask(&task, taskID)
+	updateTask, err := h.TaskService.UpdateTask(task, taskID)
 	if err != nil {
 		return err
 	}
