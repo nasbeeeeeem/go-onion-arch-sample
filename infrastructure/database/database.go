@@ -2,20 +2,30 @@
 package database
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"context"
+	"go-onion-arch-sample/ent"
+
+	_ "github.com/lib/pq"
+
+	"entgo.io/ent/dialect"
 )
 
 type DBClient struct {
-	Client *gorm.DB
+	Client *ent.Client
 }
 
 func NewDBClient() (*DBClient, error) {
-	dsn := "host=localhost user=postgres password=root dbname=db port=5432 sslmode=disable TimeZone=Asia/Tokyo"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dsn := "host=localhost port=5432 user=postgres dbname=db password=root sslmode=disable"
+	db, err := ent.Open(
+		dialect.Postgres,
+		dsn,
+	)
 	if err != nil {
 		return nil, err
 	}
-
+	if err := db.Schema.Create(context.Background()); err != nil {
+		db.Close()
+		return nil, err
+	}
 	return &DBClient{Client: db}, nil
 }
