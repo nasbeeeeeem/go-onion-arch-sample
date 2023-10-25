@@ -11,11 +11,13 @@ import (
 
 	"go-onion-arch-sample/ent/migrate"
 
+	"go-onion-arch-sample/ent/profile"
 	"go-onion-arch-sample/ent/task"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -23,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Profile is the client for interacting with the Profile builders.
+	Profile *ProfileClient
 	// Task is the client for interacting with the Task builders.
 	Task *TaskClient
 }
@@ -38,6 +42,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Profile = NewProfileClient(c.config)
 	c.Task = NewTaskClient(c.config)
 }
 
@@ -122,9 +127,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Task:   NewTaskClient(cfg),
+		ctx:     ctx,
+		config:  cfg,
+		Profile: NewProfileClient(cfg),
+		Task:    NewTaskClient(cfg),
 	}, nil
 }
 
@@ -142,16 +148,17 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:    ctx,
-		config: cfg,
-		Task:   NewTaskClient(cfg),
+		ctx:     ctx,
+		config:  cfg,
+		Profile: NewProfileClient(cfg),
+		Task:    NewTaskClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Task.
+//		Profile.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -173,22 +180,175 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Profile.Use(hooks...)
 	c.Task.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Profile.Intercept(interceptors...)
 	c.Task.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *ProfileMutation:
+		return c.Profile.mutate(ctx, m)
 	case *TaskMutation:
 		return c.Task.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// ProfileClient is a client for the Profile schema.
+type ProfileClient struct {
+	config
+}
+
+// NewProfileClient returns a client for the Profile from the given config.
+func NewProfileClient(c config) *ProfileClient {
+	return &ProfileClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `profile.Hooks(f(g(h())))`.
+func (c *ProfileClient) Use(hooks ...Hook) {
+	c.hooks.Profile = append(c.hooks.Profile, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `profile.Intercept(f(g(h())))`.
+func (c *ProfileClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Profile = append(c.inters.Profile, interceptors...)
+}
+
+// Create returns a builder for creating a Profile entity.
+func (c *ProfileClient) Create() *ProfileCreate {
+	mutation := newProfileMutation(c.config, OpCreate)
+	return &ProfileCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Profile entities.
+func (c *ProfileClient) CreateBulk(builders ...*ProfileCreate) *ProfileCreateBulk {
+	return &ProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProfileClient) MapCreateBulk(slice any, setFunc func(*ProfileCreate, int)) *ProfileCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProfileCreateBulk{err: fmt.Errorf("calling to ProfileClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProfileCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProfileCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Profile.
+func (c *ProfileClient) Update() *ProfileUpdate {
+	mutation := newProfileMutation(c.config, OpUpdate)
+	return &ProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProfileClient) UpdateOne(pr *Profile) *ProfileUpdateOne {
+	mutation := newProfileMutation(c.config, OpUpdateOne, withProfile(pr))
+	return &ProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProfileClient) UpdateOneID(id string) *ProfileUpdateOne {
+	mutation := newProfileMutation(c.config, OpUpdateOne, withProfileID(id))
+	return &ProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Profile.
+func (c *ProfileClient) Delete() *ProfileDelete {
+	mutation := newProfileMutation(c.config, OpDelete)
+	return &ProfileDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProfileClient) DeleteOne(pr *Profile) *ProfileDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProfileClient) DeleteOneID(id string) *ProfileDeleteOne {
+	builder := c.Delete().Where(profile.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProfileDeleteOne{builder}
+}
+
+// Query returns a query builder for Profile.
+func (c *ProfileClient) Query() *ProfileQuery {
+	return &ProfileQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProfile},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Profile entity by its id.
+func (c *ProfileClient) Get(ctx context.Context, id string) (*Profile, error) {
+	return c.Query().Where(profile.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProfileClient) GetX(ctx context.Context, id string) *Profile {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTasks queries the Tasks edge of a Profile.
+func (c *ProfileClient) QueryTasks(pr *Profile) *TaskQuery {
+	query := (&TaskClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(profile.Table, profile.FieldID, id),
+			sqlgraph.To(task.Table, task.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, profile.TasksTable, profile.TasksColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ProfileClient) Hooks() []Hook {
+	return c.hooks.Profile
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProfileClient) Interceptors() []Interceptor {
+	return c.inters.Profile
+}
+
+func (c *ProfileClient) mutate(ctx context.Context, m *ProfileMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProfileCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProfileUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProfileUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProfileDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Profile mutation op: %q", m.Op())
 	}
 }
 
@@ -253,7 +413,7 @@ func (c *TaskClient) UpdateOne(t *Task) *TaskUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TaskClient) UpdateOneID(id uint) *TaskUpdateOne {
+func (c *TaskClient) UpdateOneID(id int) *TaskUpdateOne {
 	mutation := newTaskMutation(c.config, OpUpdateOne, withTaskID(id))
 	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -270,7 +430,7 @@ func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *TaskClient) DeleteOneID(id uint) *TaskDeleteOne {
+func (c *TaskClient) DeleteOneID(id int) *TaskDeleteOne {
 	builder := c.Delete().Where(task.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -287,12 +447,12 @@ func (c *TaskClient) Query() *TaskQuery {
 }
 
 // Get returns a Task entity by its id.
-func (c *TaskClient) Get(ctx context.Context, id uint) (*Task, error) {
+func (c *TaskClient) Get(ctx context.Context, id int) (*Task, error) {
 	return c.Query().Where(task.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TaskClient) GetX(ctx context.Context, id uint) *Task {
+func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -328,9 +488,9 @@ func (c *TaskClient) mutate(ctx context.Context, m *TaskMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Task []ent.Hook
+		Profile, Task []ent.Hook
 	}
 	inters struct {
-		Task []ent.Interceptor
+		Profile, Task []ent.Interceptor
 	}
 )

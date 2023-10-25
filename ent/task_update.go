@@ -28,15 +28,23 @@ func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
 	return tu
 }
 
-// SetTitele sets the "titele" field.
-func (tu *TaskUpdate) SetTitele(s string) *TaskUpdate {
-	tu.mutation.SetTitele(s)
+// SetTitle sets the "title" field.
+func (tu *TaskUpdate) SetTitle(s string) *TaskUpdate {
+	tu.mutation.SetTitle(s)
 	return tu
 }
 
 // SetCompleted sets the "completed" field.
 func (tu *TaskUpdate) SetCompleted(b bool) *TaskUpdate {
 	tu.mutation.SetCompleted(b)
+	return tu
+}
+
+// SetNillableCompleted sets the "completed" field if the given value is not nil.
+func (tu *TaskUpdate) SetNillableCompleted(b *bool) *TaskUpdate {
+	if b != nil {
+		tu.SetCompleted(*b)
+	}
 	return tu
 }
 
@@ -63,6 +71,12 @@ func (tu *TaskUpdate) SetNillableDeletedAt(t *time.Time) *TaskUpdate {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (tu *TaskUpdate) ClearDeletedAt() *TaskUpdate {
 	tu.mutation.ClearDeletedAt()
+	return tu
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (tu *TaskUpdate) SetCreatedBy(s string) *TaskUpdate {
+	tu.mutation.SetCreatedBy(s)
 	return tu
 }
 
@@ -109,9 +123,14 @@ func (tu *TaskUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tu *TaskUpdate) check() error {
-	if v, ok := tu.mutation.Titele(); ok {
-		if err := task.TiteleValidator(v); err != nil {
-			return &ValidationError{Name: "titele", err: fmt.Errorf(`ent: validator failed for field "Task.titele": %w`, err)}
+	if v, ok := tu.mutation.Title(); ok {
+		if err := task.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
+		}
+	}
+	if v, ok := tu.mutation.CreatedBy(); ok {
+		if err := task.CreatedByValidator(v); err != nil {
+			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "Task.created_by": %w`, err)}
 		}
 	}
 	return nil
@@ -121,7 +140,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := tu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeUint))
+	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -129,8 +148,8 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.Titele(); ok {
-		_spec.SetField(task.FieldTitele, field.TypeString, value)
+	if value, ok := tu.mutation.Title(); ok {
+		_spec.SetField(task.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.Completed(); ok {
 		_spec.SetField(task.FieldCompleted, field.TypeBool, value)
@@ -143,6 +162,9 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.DeletedAtCleared() {
 		_spec.ClearField(task.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := tu.mutation.CreatedBy(); ok {
+		_spec.SetField(task.FieldCreatedBy, field.TypeString, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -164,15 +186,23 @@ type TaskUpdateOne struct {
 	mutation *TaskMutation
 }
 
-// SetTitele sets the "titele" field.
-func (tuo *TaskUpdateOne) SetTitele(s string) *TaskUpdateOne {
-	tuo.mutation.SetTitele(s)
+// SetTitle sets the "title" field.
+func (tuo *TaskUpdateOne) SetTitle(s string) *TaskUpdateOne {
+	tuo.mutation.SetTitle(s)
 	return tuo
 }
 
 // SetCompleted sets the "completed" field.
 func (tuo *TaskUpdateOne) SetCompleted(b bool) *TaskUpdateOne {
 	tuo.mutation.SetCompleted(b)
+	return tuo
+}
+
+// SetNillableCompleted sets the "completed" field if the given value is not nil.
+func (tuo *TaskUpdateOne) SetNillableCompleted(b *bool) *TaskUpdateOne {
+	if b != nil {
+		tuo.SetCompleted(*b)
+	}
 	return tuo
 }
 
@@ -199,6 +229,12 @@ func (tuo *TaskUpdateOne) SetNillableDeletedAt(t *time.Time) *TaskUpdateOne {
 // ClearDeletedAt clears the value of the "deleted_at" field.
 func (tuo *TaskUpdateOne) ClearDeletedAt() *TaskUpdateOne {
 	tuo.mutation.ClearDeletedAt()
+	return tuo
+}
+
+// SetCreatedBy sets the "created_by" field.
+func (tuo *TaskUpdateOne) SetCreatedBy(s string) *TaskUpdateOne {
+	tuo.mutation.SetCreatedBy(s)
 	return tuo
 }
 
@@ -258,9 +294,14 @@ func (tuo *TaskUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TaskUpdateOne) check() error {
-	if v, ok := tuo.mutation.Titele(); ok {
-		if err := task.TiteleValidator(v); err != nil {
-			return &ValidationError{Name: "titele", err: fmt.Errorf(`ent: validator failed for field "Task.titele": %w`, err)}
+	if v, ok := tuo.mutation.Title(); ok {
+		if err := task.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
+		}
+	}
+	if v, ok := tuo.mutation.CreatedBy(); ok {
+		if err := task.CreatedByValidator(v); err != nil {
+			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "Task.created_by": %w`, err)}
 		}
 	}
 	return nil
@@ -270,7 +311,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	if err := tuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeUint))
+	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
@@ -295,8 +336,8 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Titele(); ok {
-		_spec.SetField(task.FieldTitele, field.TypeString, value)
+	if value, ok := tuo.mutation.Title(); ok {
+		_spec.SetField(task.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.Completed(); ok {
 		_spec.SetField(task.FieldCompleted, field.TypeBool, value)
@@ -309,6 +350,9 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 	}
 	if tuo.mutation.DeletedAtCleared() {
 		_spec.ClearField(task.FieldDeletedAt, field.TypeTime)
+	}
+	if value, ok := tuo.mutation.CreatedBy(); ok {
+		_spec.SetField(task.FieldCreatedBy, field.TypeString, value)
 	}
 	_node = &Task{config: tuo.config}
 	_spec.Assign = _node.assignValues

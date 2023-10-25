@@ -22,9 +22,15 @@ func main() {
 
 	taskHandler := handler.NewTaskHandler(taskService)
 
+	profileRepo := repository.NewProfileRepository(db)
+
+	profileService := service.NewProfileService(profileRepo)
+
+	profileHandler := handler.NewProfileHandler(profileService)
+
 	e := echo.New()
 
-	router.NewRouter(e, taskHandler)
+	router.NewRouter(e, taskHandler, profileHandler)
 
 	e.Start("localhost:8080")
 }

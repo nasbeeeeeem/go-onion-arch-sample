@@ -20,15 +20,23 @@ type TaskCreate struct {
 	hooks    []Hook
 }
 
-// SetTitele sets the "titele" field.
-func (tc *TaskCreate) SetTitele(s string) *TaskCreate {
-	tc.mutation.SetTitele(s)
+// SetTitle sets the "title" field.
+func (tc *TaskCreate) SetTitle(s string) *TaskCreate {
+	tc.mutation.SetTitle(s)
 	return tc
 }
 
 // SetCompleted sets the "completed" field.
 func (tc *TaskCreate) SetCompleted(b bool) *TaskCreate {
 	tc.mutation.SetCompleted(b)
+	return tc
+}
+
+// SetNillableCompleted sets the "completed" field if the given value is not nil.
+func (tc *TaskCreate) SetNillableCompleted(b *bool) *TaskCreate {
+	if b != nil {
+		tc.SetCompleted(*b)
+	}
 	return tc
 }
 
@@ -74,9 +82,9 @@ func (tc *TaskCreate) SetNillableDeletedAt(t *time.Time) *TaskCreate {
 	return tc
 }
 
-// SetID sets the "id" field.
-func (tc *TaskCreate) SetID(u uint) *TaskCreate {
-	tc.mutation.SetID(u)
+// SetCreatedBy sets the "created_by" field.
+func (tc *TaskCreate) SetCreatedBy(s string) *TaskCreate {
+	tc.mutation.SetCreatedBy(s)
 	return tc
 }
 
@@ -115,6 +123,10 @@ func (tc *TaskCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TaskCreate) defaults() {
+	if _, ok := tc.mutation.Completed(); !ok {
+		v := task.DefaultCompleted
+		tc.mutation.SetCompleted(v)
+	}
 	if _, ok := tc.mutation.CreatedAt(); !ok {
 		v := task.DefaultCreatedAt()
 		tc.mutation.SetCreatedAt(v)
@@ -127,12 +139,12 @@ func (tc *TaskCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TaskCreate) check() error {
-	if _, ok := tc.mutation.Titele(); !ok {
-		return &ValidationError{Name: "titele", err: errors.New(`ent: missing required field "Task.titele"`)}
+	if _, ok := tc.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Task.title"`)}
 	}
-	if v, ok := tc.mutation.Titele(); ok {
-		if err := task.TiteleValidator(v); err != nil {
-			return &ValidationError{Name: "titele", err: fmt.Errorf(`ent: validator failed for field "Task.titele": %w`, err)}
+	if v, ok := tc.mutation.Title(); ok {
+		if err := task.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Task.title": %w`, err)}
 		}
 	}
 	if _, ok := tc.mutation.Completed(); !ok {
@@ -143,6 +155,14 @@ func (tc *TaskCreate) check() error {
 	}
 	if _, ok := tc.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Task.updated_at"`)}
+	}
+	if _, ok := tc.mutation.CreatedBy(); !ok {
+		return &ValidationError{Name: "created_by", err: errors.New(`ent: missing required field "Task.created_by"`)}
+	}
+	if v, ok := tc.mutation.CreatedBy(); ok {
+		if err := task.CreatedByValidator(v); err != nil {
+			return &ValidationError{Name: "created_by", err: fmt.Errorf(`ent: validator failed for field "Task.created_by": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -158,10 +178,8 @@ func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = uint(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	tc.mutation.id = &_node.ID
 	tc.mutation.done = true
 	return _node, nil
@@ -170,15 +188,11 @@ func (tc *TaskCreate) sqlSave(ctx context.Context) (*Task, error) {
 func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Task{config: tc.config}
-		_spec = sqlgraph.NewCreateSpec(task.Table, sqlgraph.NewFieldSpec(task.FieldID, field.TypeUint))
+		_spec = sqlgraph.NewCreateSpec(task.Table, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
 	)
-	if id, ok := tc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
-	}
-	if value, ok := tc.mutation.Titele(); ok {
-		_spec.SetField(task.FieldTitele, field.TypeString, value)
-		_node.Titele = value
+	if value, ok := tc.mutation.Title(); ok {
+		_spec.SetField(task.FieldTitle, field.TypeString, value)
+		_node.Title = value
 	}
 	if value, ok := tc.mutation.Completed(); ok {
 		_spec.SetField(task.FieldCompleted, field.TypeBool, value)
@@ -194,7 +208,11 @@ func (tc *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := tc.mutation.DeletedAt(); ok {
 		_spec.SetField(task.FieldDeletedAt, field.TypeTime, value)
-		_node.DeletedAt = &value
+		_node.DeletedAt = value
+	}
+	if value, ok := tc.mutation.CreatedBy(); ok {
+		_spec.SetField(task.FieldCreatedBy, field.TypeString, value)
+		_node.CreatedBy = value
 	}
 	return _node, _spec
 }
@@ -244,9 +262,9 @@ func (tcb *TaskCreateBulk) Save(ctx context.Context) ([]*Task, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = uint(id)
+					nodes[i].ID = int(id)
 				}
 				mutation.done = true
 				return nodes[i], nil
