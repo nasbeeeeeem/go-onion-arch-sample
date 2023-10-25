@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go-onion-arch-sample/ent/profile"
 	"go-onion-arch-sample/ent/task"
 	"reflect"
 	"sync"
@@ -73,7 +74,8 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			task.Table: task.ValidColumn,
+			profile.Table: profile.ValidColumn,
+			task.Table:    task.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"go-onion-arch-sample/ent/profile"
 	"go-onion-arch-sample/ent/schema"
 	"go-onion-arch-sample/ent/task"
 	"time"
@@ -12,20 +13,96 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	profileFields := schema.Profile{}.Fields()
+	_ = profileFields
+	// profileDescName is the schema descriptor for name field.
+	profileDescName := profileFields[1].Descriptor()
+	// profile.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	profile.NameValidator = func() func(string) error {
+		validators := profileDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+			validators[2].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// profileDescEmail is the schema descriptor for email field.
+	profileDescEmail := profileFields[2].Descriptor()
+	// profile.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	profile.EmailValidator = profileDescEmail.Validators[0].(func(string) error)
+	// profileDescCreateAt is the schema descriptor for create_at field.
+	profileDescCreateAt := profileFields[4].Descriptor()
+	// profile.DefaultCreateAt holds the default value on creation for the create_at field.
+	profile.DefaultCreateAt = profileDescCreateAt.Default.(func() time.Time)
+	// profileDescUpdateAt is the schema descriptor for update_at field.
+	profileDescUpdateAt := profileFields[5].Descriptor()
+	// profile.DefaultUpdateAt holds the default value on creation for the update_at field.
+	profile.DefaultUpdateAt = profileDescUpdateAt.Default.(func() time.Time)
+	// profile.UpdateDefaultUpdateAt holds the default value on update for the update_at field.
+	profile.UpdateDefaultUpdateAt = profileDescUpdateAt.UpdateDefault.(func() time.Time)
+	// profileDescID is the schema descriptor for id field.
+	profileDescID := profileFields[0].Descriptor()
+	// profile.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	profile.IDValidator = func() func(string) error {
+		validators := profileDescID.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+			validators[2].(func(string) error),
+		}
+		return func(id string) error {
+			for _, fn := range fns {
+				if err := fn(id); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 	taskFields := schema.Task{}.Fields()
 	_ = taskFields
-	// taskDescTitele is the schema descriptor for titele field.
-	taskDescTitele := taskFields[1].Descriptor()
-	// task.TiteleValidator is a validator for the "titele" field. It is called by the builders before save.
-	task.TiteleValidator = taskDescTitele.Validators[0].(func(string) error)
+	// taskDescTitle is the schema descriptor for title field.
+	taskDescTitle := taskFields[0].Descriptor()
+	// task.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	task.TitleValidator = taskDescTitle.Validators[0].(func(string) error)
+	// taskDescCompleted is the schema descriptor for completed field.
+	taskDescCompleted := taskFields[1].Descriptor()
+	// task.DefaultCompleted holds the default value on creation for the completed field.
+	task.DefaultCompleted = taskDescCompleted.Default.(bool)
 	// taskDescCreatedAt is the schema descriptor for created_at field.
-	taskDescCreatedAt := taskFields[3].Descriptor()
+	taskDescCreatedAt := taskFields[2].Descriptor()
 	// task.DefaultCreatedAt holds the default value on creation for the created_at field.
 	task.DefaultCreatedAt = taskDescCreatedAt.Default.(func() time.Time)
 	// taskDescUpdatedAt is the schema descriptor for updated_at field.
-	taskDescUpdatedAt := taskFields[4].Descriptor()
+	taskDescUpdatedAt := taskFields[3].Descriptor()
 	// task.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	task.DefaultUpdatedAt = taskDescUpdatedAt.Default.(func() time.Time)
 	// task.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	task.UpdateDefaultUpdatedAt = taskDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// taskDescCreatedBy is the schema descriptor for created_by field.
+	taskDescCreatedBy := taskFields[5].Descriptor()
+	// task.CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
+	task.CreatedByValidator = func() func(string) error {
+		validators := taskDescCreatedBy.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(created_by string) error {
+			for _, fn := range fns {
+				if err := fn(created_by); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
 }

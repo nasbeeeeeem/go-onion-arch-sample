@@ -21,7 +21,7 @@ func NewTaskRepository(db *database.DBClient) repository.TaskRepository {
 
 // タスクの登録
 func (t *taskRepository) CreateTask(task ent.Task) (*ent.Task, error) {
-	newTask, err := t.dbClient.Client.Task.Create().SetTitele(task.Titele).SetCompleted(task.Completed).Save(context.Background())
+	newTask, err := t.dbClient.Client.Task.Create().SetTitle(task.Title).SetCompleted(task.Completed).SetCreatedBy(task.CreatedBy).Save(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (t *taskRepository) CreateTask(task ent.Task) (*ent.Task, error) {
 
 // タスクの取得
 func (t *taskRepository) GetTaskById(taskID int) (*ent.Task, error) {
-	task, err := t.dbClient.Client.Task.Query().Where(task.ID(uint(taskID))).Only(context.Background())
+	task, err := t.dbClient.Client.Task.Query().Where(task.ID(taskID)).Only(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -50,17 +50,18 @@ func (t *taskRepository) GetTasks() ([]*ent.Task, error) {
 
 // タスクの更新
 func (t *taskRepository) UpdateTask(task ent.Task, taskID int) (*ent.Task, error) {
-	updateTask, err := t.dbClient.Client.Task.UpdateOneID(uint(taskID)).SetTitele(task.Titele).SetCompleted(task.Completed).Save(context.Background())
+	updateTask, err := t.dbClient.Client.Task.UpdateOneID(taskID).SetTitle(task.Title).SetCompleted(task.Completed).Save(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
 	return updateTask, nil
+
 }
 
 // タスクの削除
 func (t *taskRepository) DeleteTask(taskID int) error {
-	err := t.dbClient.Client.Task.DeleteOneID(uint(taskID)).Exec(context.Background())
+	err := t.dbClient.Client.Task.DeleteOneID(taskID).Exec(context.Background())
 	if err != nil {
 		return err
 	}

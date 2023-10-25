@@ -15,9 +15,8 @@ type Task struct {
 // Fields of the Task.
 func (Task) Fields() []ent.Field {
 	return []ent.Field{
-		field.Uint("id"),
-		field.String("titele").NotEmpty(),
-		field.Bool("completed"),
+		field.String("title").NotEmpty(),
+		field.Bool("completed").Default(false),
 		field.Time("created_at").
 			Default(time.Now).
 			Immutable(),
@@ -25,12 +24,14 @@ func (Task) Fields() []ent.Field {
 			Default(time.Now).
 			UpdateDefault(time.Now),
 		field.Time("deleted_at").
-			Optional().
-			Nillable(),
+			Optional(),
+		field.String("created_by").MaxLen(28).NotEmpty(),
 	}
 }
 
 // Edges of the Task.
 func (Task) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		// edge.From("Profile", Profile.Type),
+	}
 }

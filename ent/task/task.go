@@ -13,8 +13,8 @@ const (
 	Label = "task"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldTitele holds the string denoting the titele field in the database.
-	FieldTitele = "titele"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
 	// FieldCompleted holds the string denoting the completed field in the database.
 	FieldCompleted = "completed"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -23,6 +23,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldCreatedBy holds the string denoting the created_by field in the database.
+	FieldCreatedBy = "created_by"
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )
@@ -30,11 +32,18 @@ const (
 // Columns holds all SQL columns for task fields.
 var Columns = []string{
 	FieldID,
-	FieldTitele,
+	FieldTitle,
 	FieldCompleted,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldCreatedBy,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "tasks"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"profile_tasks",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -44,18 +53,27 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
-	// TiteleValidator is a validator for the "titele" field. It is called by the builders before save.
-	TiteleValidator func(string) error
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
+	// DefaultCompleted holds the default value on creation for the "completed" field.
+	DefaultCompleted bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
 	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
+	// CreatedByValidator is a validator for the "created_by" field. It is called by the builders before save.
+	CreatedByValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Task queries.
@@ -66,9 +84,9 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByTitele orders the results by the titele field.
-func ByTitele(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldTitele, opts...).ToFunc()
+// ByTitle orders the results by the title field.
+func ByTitle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTitle, opts...).ToFunc()
 }
 
 // ByCompleted orders the results by the completed field.
@@ -89,4 +107,9 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 // ByDeletedAt orders the results by the deleted_at field.
 func ByDeletedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDeletedAt, opts...).ToFunc()
+}
+
+// ByCreatedBy orders the results by the created_by field.
+func ByCreatedBy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedBy, opts...).ToFunc()
 }

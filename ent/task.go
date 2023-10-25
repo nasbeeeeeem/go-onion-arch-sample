@@ -16,9 +16,9 @@ import (
 type Task struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uint `json:"id,omitempty"`
-	// Titele holds the value of the "titele" field.
-	Titele string `json:"titele,omitempty"`
+	ID int `json:"id,omitempty"`
+	// Title holds the value of the "title" field.
+	Title string `json:"title,omitempty"`
 	// Completed holds the value of the "completed" field.
 	Completed bool `json:"completed,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -26,8 +26,11 @@ type Task struct {
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
-	DeletedAt    *time.Time `json:"deleted_at,omitempty"`
-	selectValues sql.SelectValues
+	DeletedAt time.Time `json:"deleted_at,omitempty"`
+	// CreatedBy holds the value of the "created_by" field.
+	CreatedBy     string `json:"created_by,omitempty"`
+	profile_tasks *string
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -39,10 +42,12 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case task.FieldID:
 			values[i] = new(sql.NullInt64)
-		case task.FieldTitele:
+		case task.FieldTitle, task.FieldCreatedBy:
 			values[i] = new(sql.NullString)
 		case task.FieldCreatedAt, task.FieldUpdatedAt, task.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
+		case task.ForeignKeys[0]: // profile_tasks
+			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -63,12 +68,12 @@ func (t *Task) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			t.ID = uint(value.Int64)
-		case task.FieldTitele:
+			t.ID = int(value.Int64)
+		case task.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field titele", values[i])
+				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				t.Titele = value.String
+				t.Title = value.String
 			}
 		case task.FieldCompleted:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -92,8 +97,20 @@ func (t *Task) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
-				t.DeletedAt = new(time.Time)
-				*t.DeletedAt = value.Time
+				t.DeletedAt = value.Time
+			}
+		case task.FieldCreatedBy:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field created_by", values[i])
+			} else if value.Valid {
+				t.CreatedBy = value.String
+			}
+		case task.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field profile_tasks", values[i])
+			} else if value.Valid {
+				t.profile_tasks = new(string)
+				*t.profile_tasks = value.String
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -131,8 +148,8 @@ func (t *Task) String() string {
 	var builder strings.Builder
 	builder.WriteString("Task(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("titele=")
-	builder.WriteString(t.Titele)
+	builder.WriteString("title=")
+	builder.WriteString(t.Title)
 	builder.WriteString(", ")
 	builder.WriteString("completed=")
 	builder.WriteString(fmt.Sprintf("%v", t.Completed))
@@ -143,10 +160,11 @@ func (t *Task) String() string {
 	builder.WriteString("updated_at=")
 	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := t.DeletedAt; v != nil {
-		builder.WriteString("deleted_at=")
-		builder.WriteString(v.Format(time.ANSIC))
-	}
+	builder.WriteString("deleted_at=")
+	builder.WriteString(t.DeletedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("created_by=")
+	builder.WriteString(t.CreatedBy)
 	builder.WriteByte(')')
 	return builder.String()
 }

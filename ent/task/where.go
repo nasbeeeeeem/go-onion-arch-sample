@@ -10,53 +10,53 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id uint) predicate.Task {
+func ID(id int) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id uint) predicate.Task {
+func IDEQ(id int) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id uint) predicate.Task {
+func IDNEQ(id int) predicate.Task {
 	return predicate.Task(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...uint) predicate.Task {
+func IDIn(ids ...int) predicate.Task {
 	return predicate.Task(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...uint) predicate.Task {
+func IDNotIn(ids ...int) predicate.Task {
 	return predicate.Task(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id uint) predicate.Task {
+func IDGT(id int) predicate.Task {
 	return predicate.Task(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id uint) predicate.Task {
+func IDGTE(id int) predicate.Task {
 	return predicate.Task(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id uint) predicate.Task {
+func IDLT(id int) predicate.Task {
 	return predicate.Task(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id uint) predicate.Task {
+func IDLTE(id int) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldID, id))
 }
 
-// Titele applies equality check predicate on the "titele" field. It's identical to TiteleEQ.
-func Titele(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldTitele, v))
+// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
+func Title(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldTitle, v))
 }
 
 // Completed applies equality check predicate on the "completed" field. It's identical to CompletedEQ.
@@ -79,69 +79,74 @@ func DeletedAt(v time.Time) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldDeletedAt, v))
 }
 
-// TiteleEQ applies the EQ predicate on the "titele" field.
-func TiteleEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldEQ(FieldTitele, v))
+// CreatedBy applies equality check predicate on the "created_by" field. It's identical to CreatedByEQ.
+func CreatedBy(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldCreatedBy, v))
 }
 
-// TiteleNEQ applies the NEQ predicate on the "titele" field.
-func TiteleNEQ(v string) predicate.Task {
-	return predicate.Task(sql.FieldNEQ(FieldTitele, v))
+// TitleEQ applies the EQ predicate on the "title" field.
+func TitleEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldTitle, v))
 }
 
-// TiteleIn applies the In predicate on the "titele" field.
-func TiteleIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldIn(FieldTitele, vs...))
+// TitleNEQ applies the NEQ predicate on the "title" field.
+func TitleNEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldTitle, v))
 }
 
-// TiteleNotIn applies the NotIn predicate on the "titele" field.
-func TiteleNotIn(vs ...string) predicate.Task {
-	return predicate.Task(sql.FieldNotIn(FieldTitele, vs...))
+// TitleIn applies the In predicate on the "title" field.
+func TitleIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldTitle, vs...))
 }
 
-// TiteleGT applies the GT predicate on the "titele" field.
-func TiteleGT(v string) predicate.Task {
-	return predicate.Task(sql.FieldGT(FieldTitele, v))
+// TitleNotIn applies the NotIn predicate on the "title" field.
+func TitleNotIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldTitle, vs...))
 }
 
-// TiteleGTE applies the GTE predicate on the "titele" field.
-func TiteleGTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldGTE(FieldTitele, v))
+// TitleGT applies the GT predicate on the "title" field.
+func TitleGT(v string) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldTitle, v))
 }
 
-// TiteleLT applies the LT predicate on the "titele" field.
-func TiteleLT(v string) predicate.Task {
-	return predicate.Task(sql.FieldLT(FieldTitele, v))
+// TitleGTE applies the GTE predicate on the "title" field.
+func TitleGTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldTitle, v))
 }
 
-// TiteleLTE applies the LTE predicate on the "titele" field.
-func TiteleLTE(v string) predicate.Task {
-	return predicate.Task(sql.FieldLTE(FieldTitele, v))
+// TitleLT applies the LT predicate on the "title" field.
+func TitleLT(v string) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldTitle, v))
 }
 
-// TiteleContains applies the Contains predicate on the "titele" field.
-func TiteleContains(v string) predicate.Task {
-	return predicate.Task(sql.FieldContains(FieldTitele, v))
+// TitleLTE applies the LTE predicate on the "title" field.
+func TitleLTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldTitle, v))
 }
 
-// TiteleHasPrefix applies the HasPrefix predicate on the "titele" field.
-func TiteleHasPrefix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasPrefix(FieldTitele, v))
+// TitleContains applies the Contains predicate on the "title" field.
+func TitleContains(v string) predicate.Task {
+	return predicate.Task(sql.FieldContains(FieldTitle, v))
 }
 
-// TiteleHasSuffix applies the HasSuffix predicate on the "titele" field.
-func TiteleHasSuffix(v string) predicate.Task {
-	return predicate.Task(sql.FieldHasSuffix(FieldTitele, v))
+// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
+func TitleHasPrefix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasPrefix(FieldTitle, v))
 }
 
-// TiteleEqualFold applies the EqualFold predicate on the "titele" field.
-func TiteleEqualFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldEqualFold(FieldTitele, v))
+// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
+func TitleHasSuffix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasSuffix(FieldTitle, v))
 }
 
-// TiteleContainsFold applies the ContainsFold predicate on the "titele" field.
-func TiteleContainsFold(v string) predicate.Task {
-	return predicate.Task(sql.FieldContainsFold(FieldTitele, v))
+// TitleEqualFold applies the EqualFold predicate on the "title" field.
+func TitleEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldTitle, v))
+}
+
+// TitleContainsFold applies the ContainsFold predicate on the "title" field.
+func TitleContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // CompletedEQ applies the EQ predicate on the "completed" field.
@@ -282,6 +287,71 @@ func DeletedAtIsNil() predicate.Task {
 // DeletedAtNotNil applies the NotNil predicate on the "deleted_at" field.
 func DeletedAtNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldDeletedAt))
+}
+
+// CreatedByEQ applies the EQ predicate on the "created_by" field.
+func CreatedByEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldCreatedBy, v))
+}
+
+// CreatedByNEQ applies the NEQ predicate on the "created_by" field.
+func CreatedByNEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldCreatedBy, v))
+}
+
+// CreatedByIn applies the In predicate on the "created_by" field.
+func CreatedByIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByNotIn applies the NotIn predicate on the "created_by" field.
+func CreatedByNotIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldCreatedBy, vs...))
+}
+
+// CreatedByGT applies the GT predicate on the "created_by" field.
+func CreatedByGT(v string) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldCreatedBy, v))
+}
+
+// CreatedByGTE applies the GTE predicate on the "created_by" field.
+func CreatedByGTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldCreatedBy, v))
+}
+
+// CreatedByLT applies the LT predicate on the "created_by" field.
+func CreatedByLT(v string) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldCreatedBy, v))
+}
+
+// CreatedByLTE applies the LTE predicate on the "created_by" field.
+func CreatedByLTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldCreatedBy, v))
+}
+
+// CreatedByContains applies the Contains predicate on the "created_by" field.
+func CreatedByContains(v string) predicate.Task {
+	return predicate.Task(sql.FieldContains(FieldCreatedBy, v))
+}
+
+// CreatedByHasPrefix applies the HasPrefix predicate on the "created_by" field.
+func CreatedByHasPrefix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasPrefix(FieldCreatedBy, v))
+}
+
+// CreatedByHasSuffix applies the HasSuffix predicate on the "created_by" field.
+func CreatedByHasSuffix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasSuffix(FieldCreatedBy, v))
+}
+
+// CreatedByEqualFold applies the EqualFold predicate on the "created_by" field.
+func CreatedByEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldCreatedBy, v))
+}
+
+// CreatedByContainsFold applies the ContainsFold predicate on the "created_by" field.
+func CreatedByContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldCreatedBy, v))
 }
 
 // And groups predicates with the AND operator between them.

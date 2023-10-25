@@ -8,26 +8,54 @@ import (
 )
 
 var (
+	// ProfilesColumns holds the columns for the "profiles" table.
+	ProfilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString, Size: 28},
+		{Name: "name", Type: field.TypeString, Size: 32},
+		{Name: "email", Type: field.TypeString, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "photo_url", Type: field.TypeString, Nullable: true, SchemaType: map[string]string{"postgres": "text"}},
+		{Name: "create_at", Type: field.TypeTime},
+		{Name: "update_at", Type: field.TypeTime},
+		{Name: "delete_at", Type: field.TypeTime, Nullable: true},
+	}
+	// ProfilesTable holds the schema information for the "profiles" table.
+	ProfilesTable = &schema.Table{
+		Name:       "profiles",
+		Columns:    ProfilesColumns,
+		PrimaryKey: []*schema.Column{ProfilesColumns[0]},
+	}
 	// TasksColumns holds the columns for the "tasks" table.
 	TasksColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUint, Increment: true},
-		{Name: "titele", Type: field.TypeString},
-		{Name: "completed", Type: field.TypeBool},
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "completed", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_by", Type: field.TypeString, Size: 28},
+		{Name: "profile_tasks", Type: field.TypeString, Nullable: true, Size: 28},
 	}
 	// TasksTable holds the schema information for the "tasks" table.
 	TasksTable = &schema.Table{
 		Name:       "tasks",
 		Columns:    TasksColumns,
 		PrimaryKey: []*schema.Column{TasksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tasks_profiles_Tasks",
+				Columns:    []*schema.Column{TasksColumns[7]},
+				RefColumns: []*schema.Column{ProfilesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ProfilesTable,
 		TasksTable,
 	}
 )
 
 func init() {
+	TasksTable.ForeignKeys[0].RefTable = ProfilesTable
 }
