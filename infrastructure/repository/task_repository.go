@@ -39,8 +39,8 @@ func (t *taskRepository) GetTaskById(taskID int) (*ent.Task, error) {
 }
 
 // タスクの全件取得
-func (t *taskRepository) GetTasks() ([]*ent.Task, error) {
-	tasks, err := t.dbClient.Client.Task.Query().All(context.Background())
+func (t *taskRepository) GetTasks(profileID string) ([]*ent.Task, error) {
+	tasks, err := t.dbClient.Client.Task.Query().Where(task.CreatedBy(profileID)).All(context.Background())
 	if err != nil {
 		return nil, err
 	}

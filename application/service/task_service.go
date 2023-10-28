@@ -9,7 +9,7 @@ import (
 type TaskService interface {
 	CreateTask(task ent.Task) (*ent.Task, error)
 	GetTaskById(taskID int) (*ent.Task, error)
-	GetTasks() ([]*ent.Task, error)
+	GetTasks(profileID string) ([]*ent.Task, error)
 	UpdateTask(task ent.Task, taskID int) (*ent.Task, error)
 	DeleteTask(taskID int) error
 }
@@ -35,8 +35,8 @@ func (t *taskService) GetTaskById(taskID int) (*ent.Task, error) {
 }
 
 // タスクの全件取得
-func (t *taskService) GetTasks() ([]*ent.Task, error) {
-	return t.taskRepo.GetTasks()
+func (t *taskService) GetTasks(profileID string) ([]*ent.Task, error) {
+	return t.taskRepo.GetTasks(profileID)
 }
 
 // タスクの更新

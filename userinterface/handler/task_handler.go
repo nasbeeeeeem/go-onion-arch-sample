@@ -5,6 +5,7 @@ import (
 	"go-onion-arch-sample/ent"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -53,7 +54,11 @@ func (h *TaskHandler) GetTaskByID(c echo.Context) error {
 
 // タスクの全件取得
 func (h *TaskHandler) GetTasks(c echo.Context) error {
-	tasks, err := h.TaskService.GetTasks()
+	req := c.Request()
+	authorization := req.Header.Get("Authorization")
+	arr := strings.Split(authorization, " ")
+
+	tasks, err := h.TaskService.GetTasks(arr[1])
 	if err != nil {
 		return err
 	}

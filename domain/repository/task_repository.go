@@ -10,7 +10,7 @@ import (
 type TaskRepository interface {
 	CreateTask(task ent.Task) (*ent.Task, error)
 	GetTaskById(taskID int) (*ent.Task, error)
-	GetTasks() ([]*ent.Task, error)
+	GetTasks(profileID string) ([]*ent.Task, error)
 	UpdateTask(task ent.Task, taskID int) (*ent.Task, error)
 	DeleteTask(taskID int) error
 }
